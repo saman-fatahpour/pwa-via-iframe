@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <script>
+    function isWebRTCSupported() {
+  // Check if the browser supports WebRTC
+  if (navigator && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+    // Check if required WebRTC functions are supported
+    return typeof RTCPeerConnection === 'function' &&
+           typeof RTCSessionDescription === 'function' &&
+           typeof RTCIceCandidate === 'function';
+  } else {
+    return false;
+  }
+}
+
+// Example usage with alert
+if (isWebRTCSupported()) {
+  alert('WebRTC is supported in this browser.');
+} else {
+  alert('WebRTC is not supported in this browser.');
+}
+</script>
+  </head>
+  <body>hi</body>
+</html>
