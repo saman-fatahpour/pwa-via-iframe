@@ -14,7 +14,7 @@
 <body>
 
 <video id="localVideo" autoplay muted playsinline></video>
-<video id="remoteVideo" autoplay playsinline></video>
+<video id="remoteVideo" autoplay muted playsinline></video>
 
 <script>
 // Get local video stream
@@ -49,7 +49,6 @@ function handleSuccess(stream) {
       // In a real application, you would send the offer to the remote peer
       // For this example, we'll simply log the offer to the console
       console.log('Offer:', peerConnection.localDescription);
-alert(JSON.stringify(peerConnection.localDescription))
     })
     .catch(handleError);
 }
