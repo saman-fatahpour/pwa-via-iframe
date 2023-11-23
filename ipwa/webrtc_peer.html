@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebRTC Demo</title>
+</head>
+<body>
+  <h1>WebRTC Demo</h1>
+  <video id="localVideo" autoplay muted></video>
+  <video id="remoteVideo" autoplay></video>
+
+  <script>
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+
+    // Create a new peer
+    const peer = new SimplePeer({ initiator: location.hash === '#initiator', trickle: false });
+
+    // Get user media (video and audio)
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        localVideo.srcObject = stream;
+        peer.addStream(stream);
+
+        peer.on('signal', data => {
+          console.log('SIGNAL', JSON.stringify(data));
+        });
+
+        peer.on('connect', () => {
+          console.log('CONNECTED');
+        });
+
+        peer.on('data', data => {
+          console.log('DATA', data);
+        });
+
+        peer.on('stream', remoteStream => {
+          remoteVideo.srcObject = remoteStream;
+        });
+      })
+      .catch(error => {
+        console.error('Error accessing media devices:', error);
+      });
+
+    document.body.addEventListener('click', () => {
+      peer.send('Hello from initiator!');
+    });
+
+    if (location.hash === '#initiator') {
+      setTimeout(() => {
+        peer.signal(JSON.parse(prompt('Paste signal data here:')));
+      }, 1000);
+    }
+  </script>
+
+  <!-- Include the SimplePeer library -->
+  <script src="https://cdn.jsdelivr.net/npm/simple-peer@10.1.0/dist/simplepeer.min.js"></script>
+</body>
+</html>
