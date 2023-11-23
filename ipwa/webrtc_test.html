@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebRTC Streaming Example</title>
+  <style>
+    video {
+      width: 45%;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<video id="localVideo" autoplay muted playsinline></video>
+<video id="remoteVideo" autoplay playsinline></video>
+
+<script>
+// Get local video stream
+navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+  .then(handleSuccess)
+  .catch(handleError);
+
+function handleSuccess(stream) {
+  // Display local video
+  const localVideo = document.getElementById('localVideo');
+  localVideo.srcObject = stream;
+
+  // Set up peer connection
+  const peerConnection = new RTCPeerConnection();
+
+  // Add local stream to peer connection
+  stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+  // Set up remote video
+  const remoteVideo = document.getElementById('remoteVideo');
+  peerConnection.ontrack = event => {
+    if (!remoteVideo.srcObject) {
+      remoteVideo.srcObject = new MediaStream();
+    }
+    remoteVideo.srcObject.addTrack(event.track);
+  };
+
+  // Create and send offer to establish connection
+  peerConnection.createOffer()
+    .then(offer => peerConnection.setLocalDescription(offer))
+    .then(() => {
+      // In a real application, you would send the offer to the remote peer
+      // For this example, we'll simply log the offer to the console
+      console.log('Offer:', peerConnection.localDescription);
+    })
+    .catch(handleError);
+}
+
+function handleError(error) {
+  console.error('Error accessing media devices:', error);
+}
+
+</script>
+
+</body>
+</html>
