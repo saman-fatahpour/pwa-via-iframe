@@ -17,45 +17,47 @@
 <video id="remoteVideo" autoplay muted playsinline></video>
 
 <script>
-// Get local video stream
-navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-  .then(handleSuccess)
-  .catch(handleError);
+async function startStreaming() {
+  try {
+    // Get local video stream
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-function handleSuccess(stream) {
-  // Display local video
-  const localVideo = document.getElementById('localVideo');
-  localVideo.srcObject = stream;
+    // Display local video
+    const localVideo = document.getElementById('localVideo');
+    localVideo.srcObject = stream;
 
-  // Set up peer connection
-  const peerConnection = new RTCPeerConnection();
+    // Set up peer connection
+    const peerConnection = new RTCPeerConnection();
 
-  // Add local stream to peer connection
-  stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+    // Add local stream to peer connection
+    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
 
-  // Set up remote video
-  const remoteVideo = document.getElementById('remoteVideo');
-  peerConnection.ontrack = event => {
-    if (!remoteVideo.srcObject) {
-      remoteVideo.srcObject = new MediaStream();
-    }
-    remoteVideo.srcObject.addTrack(event.track);
-  };
+    // Set up remote video
+    const remoteVideo = document.getElementById('remoteVideo');
+    peerConnection.ontrack = event => {
+      if (!remoteVideo.srcObject) {
+        remoteVideo.srcObject = new MediaStream();
+      }
+      remoteVideo.srcObject.addTrack(event.track);
+    };
 
-  // Create and send offer to establish connection
-  peerConnection.createOffer()
-    .then(offer => peerConnection.setLocalDescription(offer))
-    .then(() => {
-      // In a real application, you would send the offer to the remote peer
-      // For this example, we'll simply log the offer to the console
-      console.log('Offer:', peerConnection.localDescription);
-    })
-    .catch(handleError);
+    // Create and send offer to establish connection
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+
+    // Simulate signaling (in a real scenario, this would involve a server)
+    const answer = prompt('Copy this offer and share it with the other user:', JSON.stringify(offer));
+    await peerConnection.setRemoteDescription(JSON.parse(answer));
+
+    // Log the answer (for demonstration purposes)
+    console.log('Answer:', answer);
+  } catch (error) {
+    console.error('Error accessing media devices:', error);
+  }
 }
 
-function handleError(error) {
-  console.error('Error accessing media devices:', error);
-}
+// Start the streaming process
+startStreaming();
 
 </script>
 
